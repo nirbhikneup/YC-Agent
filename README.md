@@ -30,6 +30,14 @@ It outputs a **contacts.csv** file you can use for outreach or research.
 
 ---
 
+
+### Example Output (contacts.csv)
+
+Here’s a preview of the matched companies with emails:
+
+![contacts preview](contacts_ss.png)
+
+
 ## Tech Stack
 
 - **Python 3.10+**
