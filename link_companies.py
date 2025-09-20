@@ -1,6 +1,9 @@
 import pandas as pd
 import sqlite3
 from rapidfuzz import fuzz, process
+import sys
+batch = sys.argv[1] if len(sys.argv) > 1 else "Summer 2024"
+
 
 DB_PATH = "yc_agent.db"
 

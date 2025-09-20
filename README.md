@@ -1,60 +1,85 @@
-# YC-Agent
-I built a YC agent that is an automated system to find YC companies info. Specifically, targeting the founders and their email, so we can make job application process smoother and easier.
+# YC Company Scraper
 
-# YC Agent – Automated YC Startup Lead Generator
-
-YC Agent is a pipeline that automatically scrapes recent **Y Combinator batches**, finds related **Hacker News posts**, extracts founder emails from comments, and links the two together.  
-It outputs a **contacts.csv** file you can use for outreach or research.
-
----
+A powerful web scraper that extracts Y Combinator company information and email addresses for any given year/batch.
 
 ## Features
 
-- **Scrape YC companies**  
-  Uses Playwright to load `ycombinator.com/companies` for a given batch and extract all startup names and links.
-
-- **Scrape Hacker News posts**  
-  Uses the Algolia HN API + Firebase API to:
-  - Find “Launch HN / Show HN” posts
-  - Recursively collect comments
-  - Extract emails using regex
-
-- **Match YC companies to HN posts**  
-  - Fuzzy string matching with RapidFuzz
-  - Links company names to HN posts and emails
-
-- **One-command automation**  
-  - `run_pipeline.py` runs the entire workflow and updates:
-    - `yc_agent.db` (SQLite database)
-    - `contacts.csv`
-
----
-
-
-### Example Output (contacts.csv)
-
-Here’s a preview of the matched companies with emails:
-
-![contacts preview](contacts_ss.png)
-
-
-## Tech Stack
-
-- **Python 3.10+**
-- Playwright (browser automation)
-- BeautifulSoup (HTML parsing)
-- Requests (API calls)
-- Pandas (data processing)
-- RapidFuzz (fuzzy matching)
-- SQLite (local storage)
-
----
+- 🚀 **Backend Operation**: Runs completely in headless mode without showing browser windows
+- 📧 **Email Extraction**: Automatically finds and extracts email addresses from company pages
+- 📊 **Data Export**: Saves results to both CSV and SQLite database
+- 🎯 **Year-based Filtering**: Scrape companies from specific YC batches
+- ⚡ **Fast & Efficient**: Uses Playwright for reliable web scraping
 
 ## Installation
 
-Clone the repo:
+1. Clone the repository:
+```bash
+git clone <your-repo-url>
+cd yc_agent
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+playwright install
+```
+
+## Usage
+
+### Command Line Interface
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YC-Agent.git
-cd YC-Agent
+# Interactive mode - prompts for year
+python scraper/yc_scraper.py
 
+# Direct mode - specify batch
+python scraper/yc_scraper.py "Summer 2024"
+```
+
+### Web API (Coming Soon)
+
+The scraper will be available as a web service with a simple interface to:
+- Select year/batch
+- Start scraping process
+- Download results as CSV
+- View progress in real-time
+
+## Output
+
+The scraper generates:
+- **CSV file**: `yc_companies_Summer_2024.csv` with company details and emails
+- **SQLite database**: `yc_agent.db` with table `yc_companies`
+
+## Data Structure
+
+Each company record includes:
+- `name`: Company name
+- `link`: YC company page URL
+- `batch`: YC batch (e.g., "Summer 2024")
+- `emails`: Comma-separated list of found emails
+- `email_count`: Number of emails found
+
+## Example Results
+
+```
+Scraped 440 companies with emails
+Companies with emails: 91
+```
+
+## Deployment
+
+This project is configured for deployment on Vercel with:
+- FastAPI backend
+- Automatic dependency installation
+- Headless browser support
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details

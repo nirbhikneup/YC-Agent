@@ -2,6 +2,9 @@ import requests
 import pandas as pd
 import re
 import sqlite3
+import sys
+batch = sys.argv[1] if len(sys.argv) > 1 else "Summer 2024"
+
 
 HN_SEARCH_URL = "https://hn.algolia.com/api/v1/search"
 HN_ITEM_URL = "https://hacker-news.firebaseio.com/v0/item/{}.json"
@@ -27,8 +30,8 @@ def fetch_comments(item_id):
                     texts.extend(fetch_comments(comment["id"]))
     return texts
 
-def scrape_hn_posts(batch="Summer 2024"):
-    query = "YC Summer 2024"
+def scrape_hn_posts(batch):
+    query = f"YC {batch}"
     url = f"{HN_SEARCH_URL}?query={query}&tags=story"
     res = requests.get(url).json()
 
@@ -55,7 +58,6 @@ def scrape_hn_posts(batch="Summer 2024"):
     return df
 
 if __name__ == "__main__":
-    batch = "Summer 2024"
     df = scrape_hn_posts(batch)
     print(f"Scraped {len(df)} HN posts for {batch}")
     print(df.head())
