@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import glob
 from datetime import datetime
+import random
 
 # Page configuration
 st.set_page_config(
@@ -27,6 +28,22 @@ st.markdown("""
         border-radius: 0.5rem;
         border-left: 4px solid #FF6B35;
     }
+    .success-box {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+    .info-box {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -36,7 +53,9 @@ SAMPLE_DATA = {
         'OpenAI', 'Stripe', 'Airbnb', 'Dropbox', 'Coinbase', 
         'DoorDash', 'Instacart', 'GitLab', 'Reddit', 'Twitch',
         'Zoom', 'Slack', 'Notion', 'Figma', 'Canva',
-        'Discord', 'Spotify', 'Netflix', 'Uber', 'Lyft'
+        'Discord', 'Spotify', 'Netflix', 'Uber', 'Lyft',
+        'Tesla', 'SpaceX', 'Meta', 'Google', 'Apple',
+        'Microsoft', 'Amazon', 'Netflix', 'Twitter', 'LinkedIn'
     ],
     'link': [
         'https://www.ycombinator.com/companies/openai',
@@ -58,23 +77,54 @@ SAMPLE_DATA = {
         'https://www.ycombinator.com/companies/spotify',
         'https://www.ycombinator.com/companies/netflix',
         'https://www.ycombinator.com/companies/uber',
-        'https://www.ycombinator.com/companies/lyft'
+        'https://www.ycombinator.com/companies/lyft',
+        'https://www.ycombinator.com/companies/tesla',
+        'https://www.ycombinator.com/companies/spacex',
+        'https://www.ycombinator.com/companies/meta',
+        'https://www.ycombinator.com/companies/google',
+        'https://www.ycombinator.com/companies/apple',
+        'https://www.ycombinator.com/companies/microsoft',
+        'https://www.ycombinator.com/companies/amazon',
+        'https://www.ycombinator.com/companies/netflix2',
+        'https://www.ycombinator.com/companies/twitter',
+        'https://www.ycombinator.com/companies/linkedin'
     ],
     'batch': [
         'Summer 2024', 'Summer 2024', 'Summer 2024', 'Summer 2024', 'Summer 2024',
         'Summer 2024', 'Summer 2024', 'Summer 2024', 'Summer 2024', 'Summer 2024',
         'Summer 2023', 'Summer 2023', 'Summer 2023', 'Summer 2023', 'Summer 2023',
-        'Summer 2023', 'Summer 2023', 'Summer 2023', 'Summer 2023', 'Summer 2023'
+        'Summer 2023', 'Summer 2023', 'Summer 2023', 'Summer 2023', 'Summer 2023',
+        'Summer 2022', 'Summer 2022', 'Summer 2022', 'Summer 2022', 'Summer 2022',
+        'Summer 2022', 'Summer 2022', 'Summer 2022', 'Summer 2022', 'Summer 2022'
     ],
     'emails': [
         'contact@openai.com', 'hello@stripe.com;support@stripe.com', 'press@airbnb.com', '', 'hello@coinbase.com',
         '', 'support@instacart.com', 'contact@gitlab.com;support@gitlab.com', '', 'press@twitch.tv',
         'support@zoom.us', 'hello@slack.com', 'contact@notion.so', 'hello@figma.com', 'support@canva.com',
-        'hello@discord.com', 'press@spotify.com', 'press@netflix.com', 'hello@uber.com', 'support@lyft.com'
+        'hello@discord.com', 'press@spotify.com', 'press@netflix.com', 'hello@uber.com', 'support@lyft.com',
+        'info@tesla.com', 'contact@spacex.com', 'press@meta.com', 'hello@google.com', 'info@apple.com',
+        'contact@microsoft.com', 'hello@amazon.com', 'press@netflix.com', 'info@twitter.com', 'contact@linkedin.com'
     ],
-    'email_count': [1, 2, 1, 0, 1, 0, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    'email_count': [1, 2, 1, 0, 1, 0, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    'industry': [
+        'AI/ML', 'Fintech', 'Travel', 'Cloud Storage', 'Crypto',
+        'Food Delivery', 'Grocery', 'DevOps', 'Social Media', 'Gaming',
+        'Video Conferencing', 'Communication', 'Productivity', 'Design', 'Graphics',
+        'Gaming', 'Music', 'Entertainment', 'Transportation', 'Transportation',
+        'Automotive', 'Aerospace', 'Social Media', 'Search', 'Technology',
+        'Software', 'E-commerce', 'Entertainment', 'Social Media', 'Professional Network'
+    ],
+    'valuation': [
+        80000, 95000, 31000, 10000, 86000,
+        16000, 39000, 11000, 10000, 15000,
+        19000, 27700, 10000, 20000, 40000,
+        15000, 23000, 150000, 72000, 24000,
+        800000, 100000, 800000, 1800000, 3000000,
+        2800000, 1500000, 150000, 41000, 20000
+    ]
 }
 
+@st.cache_data
 def load_data():
     """Load CSV data from the scraper results or use sample data"""
     csv_files = glob.glob("yc_companies_*.csv")
@@ -128,8 +178,8 @@ def create_metrics(df):
             delta=None
         )
 
-def filter_data(df):
-    """Create filtering interface"""
+def create_sidebar_filters(df):
+    """Create sidebar filters with unique keys"""
     st.sidebar.header("🔍 Filter Data")
     
     # Batch filter
@@ -137,7 +187,8 @@ def filter_data(df):
     selected_batches = st.sidebar.multiselect(
         "Select Batches:",
         options=batches,
-        default=batches
+        default=batches,
+        key="batch_filter"
     )
     
     # Email count filter
@@ -145,16 +196,45 @@ def filter_data(df):
         "Minimum Email Count:",
         min_value=0,
         max_value=int(df['email_count'].max()),
-        value=0
+        value=0,
+        key="email_filter"
     )
+    
+    # Industry filter (if available)
+    if 'industry' in df.columns:
+        industries = df['industry'].unique()
+        selected_industries = st.sidebar.multiselect(
+            "Select Industries:",
+            options=industries,
+            default=industries,
+            key="industry_filter"
+        )
+    else:
+        selected_industries = None
     
     # Company name search
     search_term = st.sidebar.text_input(
         "Search Company Names:",
-        placeholder="Enter company name..."
+        placeholder="Enter company name...",
+        key="search_filter"
     )
     
-    # Apply filters
+    # Valuation filter (if available)
+    if 'valuation' in df.columns:
+        min_valuation = st.sidebar.slider(
+            "Minimum Valuation ($M):",
+            min_value=0,
+            max_value=int(df['valuation'].max() / 1000),
+            value=0,
+            key="valuation_filter"
+        )
+    else:
+        min_valuation = 0
+    
+    return selected_batches, min_emails, selected_industries, search_term, min_valuation
+
+def apply_filters(df, selected_batches, min_emails, selected_industries, search_term, min_valuation):
+    """Apply filters to dataframe"""
     filtered_df = df.copy()
     
     if selected_batches:
@@ -162,12 +242,49 @@ def filter_data(df):
     
     filtered_df = filtered_df[filtered_df['email_count'] >= min_emails]
     
+    if selected_industries and 'industry' in df.columns:
+        filtered_df = filtered_df[filtered_df['industry'].isin(selected_industries)]
+    
     if search_term:
         filtered_df = filtered_df[
             filtered_df['name'].str.contains(search_term, case=False, na=False)
         ]
     
+    if 'valuation' in df.columns:
+        filtered_df = filtered_df[filtered_df['valuation'] >= min_valuation * 1000]
+    
     return filtered_df
+
+def create_interactive_features(df):
+    """Create interactive features"""
+    st.header("🎮 Interactive Features")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🎲 Random Company", key="random_company"):
+            random_company = df.sample(1).iloc[0]
+            st.success(f"**Random Company:** {random_company['name']}")
+            st.info(f"**Batch:** {random_company['batch']} | **Emails:** {random_company['email_count']}")
+    
+    with col2:
+        if st.button("📊 Quick Stats", key="quick_stats"):
+            stats = {
+                "Most Emails": df.loc[df['email_count'].idxmax(), 'name'],
+                "Oldest Batch": df['batch'].min(),
+                "Newest Batch": df['batch'].max(),
+                "Total Valuation": f"${df['valuation'].sum()/1000:.0f}M" if 'valuation' in df.columns else "N/A"
+            }
+            for key, value in stats.items():
+                st.metric(key, value)
+    
+    with col3:
+        if st.button("🔍 Find Similar", key="find_similar"):
+            # Find companies with similar email counts
+            avg_emails = df['email_count'].mean()
+            similar = df[abs(df['email_count'] - avg_emails) <= 1]
+            st.info(f"Found {len(similar)} companies with similar email counts")
+            st.dataframe(similar[['name', 'email_count', 'batch']].head(5))
 
 def main():
     # Header
@@ -182,12 +299,12 @@ def main():
     
     # Display file info
     if is_sample:
-        st.info(f"📁 **Data Source:** {filename} | **Note:** This is sample data. Upload your own CSV file or run the scraper to get real data.")
+        st.markdown('<div class="info-box">📁 <strong>Data Source:</strong> Sample Data (30 YC Companies) | <strong>Note:</strong> This is demo data. Upload your own CSV or run the scraper for real data.</div>', unsafe_allow_html=True)
     else:
-        st.info(f"📁 **Data Source:** {filename} | **Last Updated:** {datetime.fromtimestamp(os.path.getctime(filename)).strftime('%Y-%m-%d %H:%M:%S')}")
+        st.markdown(f'<div class="info-box">📁 <strong>Data Source:</strong> {filename} | <strong>Last Updated:</strong> {datetime.fromtimestamp(os.path.getctime(filename)).strftime("%Y-%m-%d %H:%M:%S")}</div>', unsafe_allow_html=True)
     
     # Create tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Overview", "🔍 Explore Data", "📧 Email Analysis", "💾 Download"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Overview", "🔍 Explore Data", "📧 Email Analysis", "💾 Download", "🎮 Interactive"])
     
     with tab1:
         st.header("📊 Data Overview")
@@ -208,15 +325,24 @@ def main():
             email_status = df['email_count'].apply(lambda x: 'With Emails' if x > 0 else 'No Emails')
             status_counts = email_status.value_counts()
             st.bar_chart(status_counts)
+        
+        # Industry distribution if available
+        if 'industry' in df.columns:
+            st.subheader("Industry Distribution")
+            industry_counts = df['industry'].value_counts().head(10)
+            st.bar_chart(industry_counts)
     
     with tab2:
         st.header("🔍 Explore Companies")
         
-        # Filter data
-        filtered_df = filter_data(df)
+        # Create sidebar filters
+        selected_batches, min_emails, selected_industries, search_term, min_valuation = create_sidebar_filters(df)
+        
+        # Apply filters
+        filtered_df = apply_filters(df, selected_batches, min_emails, selected_industries, search_term, min_valuation)
         
         # Display filtered results
-        st.write(f"**Showing {len(filtered_df)} of {len(df)} companies**")
+        st.markdown(f'<div class="success-box">✅ <strong>Showing {len(filtered_df)} of {len(df)} companies</strong></div>', unsafe_allow_html=True)
         
         # Display options
         col1, col2 = st.columns([3, 1])
@@ -224,16 +350,17 @@ def main():
             show_columns = st.multiselect(
                 "Select columns to display:",
                 options=df.columns.tolist(),
-                default=['name', 'batch', 'email_count', 'emails']
+                default=['name', 'batch', 'email_count', 'emails'],
+                key="column_selector"
             )
         
         with col2:
-            rows_per_page = st.selectbox("Rows per page:", [10, 25, 50, 100], index=1)
+            rows_per_page = st.selectbox("Rows per page:", [10, 25, 50, 100], index=1, key="rows_per_page")
         
         # Pagination
         total_pages = (len(filtered_df) - 1) // rows_per_page + 1
         if total_pages > 1:
-            page = st.selectbox("Page:", range(1, total_pages + 1))
+            page = st.selectbox("Page:", range(1, total_pages + 1), key="page_selector")
             start_idx = (page - 1) * rows_per_page
             end_idx = start_idx + rows_per_page
             display_df = filtered_df.iloc[start_idx:end_idx]
@@ -284,7 +411,8 @@ def main():
                     label="📥 Download Email List",
                     data=csv_emails,
                     file_name=f"yc_emails_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    key="download_emails"
                 )
         else:
             st.warning("No companies with email addresses found.")
@@ -292,11 +420,12 @@ def main():
     with tab4:
         st.header("💾 Download Data")
         
-        # Filter data for download
-        download_df = filter_data(df)
+        # Apply same filters for download
+        selected_batches, min_emails, selected_industries, search_term, min_valuation = create_sidebar_filters(df)
+        download_df = apply_filters(df, selected_batches, min_emails, selected_industries, search_term, min_valuation)
         
         st.subheader("Download Filtered Data")
-        st.write(f"**{len(download_df)} companies** will be included in the download")
+        st.markdown(f'<div class="info-box">📊 <strong>{len(download_df)} companies</strong> will be included in the download</div>', unsafe_allow_html=True)
         
         # Download options
         col1, col2 = st.columns(2)
@@ -304,14 +433,16 @@ def main():
         with col1:
             download_format = st.selectbox(
                 "Download Format:",
-                ["CSV", "JSON"]
+                ["CSV", "JSON"],
+                key="download_format"
             )
         
         with col2:
             include_columns = st.multiselect(
                 "Include Columns:",
                 options=df.columns.tolist(),
-                default=df.columns.tolist()
+                default=df.columns.tolist(),
+                key="download_columns"
             )
         
         # Prepare data for download
@@ -323,7 +454,8 @@ def main():
                 label="📥 Download CSV",
                 data=csv_data,
                 file_name=f"yc_companies_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                mime="text/csv"
+                mime="text/csv",
+                key="download_csv"
             )
         
         elif download_format == "JSON":
@@ -332,7 +464,8 @@ def main():
                 label="📥 Download JSON",
                 data=json_data,
                 file_name=f"yc_companies_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                mime="application/json"
+                mime="application/json",
+                key="download_json"
             )
         
         # Quick download buttons
@@ -340,18 +473,19 @@ def main():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("📧 Companies with Emails Only"):
+            if st.button("📧 Companies with Emails Only", key="quick_emails"):
                 companies_with_emails = df[df['email_count'] > 0]
                 csv_data = companies_with_emails.to_csv(index=False)
                 st.download_button(
                     label="Download",
                     data=csv_data,
                     file_name=f"yc_companies_with_emails_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    key="quick_download_emails"
                 )
         
         with col2:
-            if st.button("📊 Summary Statistics"):
+            if st.button("📊 Summary Statistics", key="quick_stats_download"):
                 summary = df.groupby('batch').agg({
                     'name': 'count',
                     'email_count': ['sum', 'mean']
@@ -362,19 +496,42 @@ def main():
                     label="Download",
                     data=csv_data,
                     file_name=f"yc_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    key="quick_download_stats"
                 )
         
         with col3:
-            if st.button("🔗 Company Links Only"):
+            if st.button("🔗 Company Links Only", key="quick_links"):
                 links_df = df[['name', 'link', 'batch']]
                 csv_data = links_df.to_csv(index=False)
                 st.download_button(
                     label="Download",
                     data=csv_data,
                     file_name=f"yc_company_links_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    key="quick_download_links"
                 )
+    
+    with tab5:
+        create_interactive_features(df)
+        
+        # Additional interactive features
+        st.subheader("🎯 Smart Insights")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("📈 Batch Analysis")
+            batch_stats = df.groupby('batch').agg({
+                'name': 'count',
+                'email_count': 'sum'
+            }).rename(columns={'name': 'Companies', 'email_count': 'Total Emails'})
+            st.dataframe(batch_stats)
+        
+        with col2:
+            st.subheader("🏆 Top Performers")
+            top_performers = df.nlargest(5, 'email_count')[['name', 'email_count', 'batch']]
+            st.dataframe(top_performers)
 
 if __name__ == "__main__":
     main()
