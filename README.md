@@ -2,8 +2,13 @@
 
 A powerful web scraper that extracts Y Combinator company information and email addresses for any given year/batch.
 
+## Live Demo
+
+- Explore the AI-enhanced dashboard: https://yc-agent-findjobs.streamlit.app/
+
 ## Features
 
+- 🤖 **AI Insights**: Streamlit dashboard uses Meta LLaMA 3 80B on Hugging Face for contextual answers about the dataset
 - 🚀 **Backend Operation**: Runs completely in headless mode without showing browser windows
 - 📧 **Email Extraction**: Automatically finds and extracts email addresses from company pages
 - 📊 **Data Export**: Saves results to both CSV and SQLite database
@@ -72,6 +77,15 @@ This project is configured for deployment on Vercel with:
 - FastAPI backend
 - Automatic dependency installation
 - Headless browser support
+
+### Streamlit AI Experience
+
+The live Streamlit deployment shares the same Hugging Face configuration used locally. Set the following environment variables when deploying:
+
+- `HUGGINGFACE_API_TOKEN`: Required. A token with access to the Meta LLaMA 3 80B Instruct model.
+- `HUGGINGFACE_MODEL_ID` (optional): Override the default `meta-llama/Meta-Llama-3-80B-Instruct` model.
+
+You can also customise the system prompt and sampling parameters by setting `LLM_SYSTEM_PROMPT`, `LLM_TEMPERATURE`, `LLM_TOP_P`, and `LLM_MAX_TOKENS`.
 
 ## Contributing
 
