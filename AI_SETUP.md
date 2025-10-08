@@ -2,7 +2,7 @@
 
 ## 🚀 **What's New: AI-Powered Features**
 
-This version includes AI analysis powered by Llama 3.1 8B model through Ollama, making it a true **Software + AI** project perfect for your resume!
+This version includes AI analysis powered by the **Hugging Face hosted Meta LLaMA 3 80B Instruct** model, making it a true **Software + AI** project perfect for your resume!
 
 ## 🎯 **AI Features Added:**
 
@@ -25,26 +25,24 @@ This version includes AI analysis powered by Llama 3.1 8B model through Ollama, 
 
 ## 🛠️ **Local Setup (For Full AI Features)**
 
-### **Step 1: Install Ollama**
+### **Step 1: Create a Hugging Face account**
+- Sign up at [https://huggingface.co](https://huggingface.co) (free tier works!)
+
+### **Step 2: Generate an access token**
+1. Visit [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+2. Click **Create new token**
+3. Choose **Read** permissions and copy the token value
+
+### **Step 3: Configure your environment**
+Set the token as an environment variable before launching Streamlit:
+
 ```bash
-# Download from https://ollama.ai
-# Or use package manager:
-# Windows: winget install Ollama.Ollama
-# Mac: brew install ollama
-# Linux: curl -fsSL https://ollama.ai/install.sh | sh
+export HUGGINGFACE_API_TOKEN="hf_your_token_here"
+# Optional: override the default 80B model with another Inference API model
+export HUGGINGFACE_MODEL_ID="meta-llama/Meta-Llama-3-80B-Instruct"
 ```
 
-### **Step 2: Pull Llama Model**
-```bash
-ollama pull llama3.1:8b
-```
-
-### **Step 3: Start Ollama Service**
-```bash
-ollama serve
-```
-
-### **Step 4: Run the App**
+### **Step 4: Install dependencies and run the app**
 ```bash
 pip install -r requirements-ai.txt
 streamlit run streamlit_ai.py
@@ -52,11 +50,15 @@ streamlit run streamlit_ai.py
 
 ## ☁️ **Streamlit Cloud Deployment**
 
-The app works on Streamlit Cloud with simulated AI responses (no Ollama required):
+The deployed app uses the real Hugging Face LLaMA 3 80B backend. Configure Streamlit secrets like this:
 
-1. **Deploy with**: `streamlit_ai.py` as main file
-2. **Requirements**: `requirements-ai.txt`
-3. **AI features work** with simulated responses
+1. In Streamlit Cloud, open **App settings → Secrets**
+2. Add the following content:
+   ```toml
+   HUGGINGFACE_API_TOKEN = "hf_your_token_here"
+   HUGGINGFACE_MODEL_ID = "meta-llama/Meta-Llama-3-80B-Instruct"
+   ```
+3. Deploy with `streamlit_ai.py` as the main file and `requirements-ai.txt` as the dependency list
 
 ## 🎨 **UI Improvements**
 

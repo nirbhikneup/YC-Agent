@@ -4,8 +4,13 @@ import os
 import glob
 from datetime import datetime
 import random
-import requests
 import json
+
+from llm_utils import (
+    LLMConfigurationError,
+    build_dataset_context,
+    generate_llama3_response,
+)
 
 # Page configuration
 st.set_page_config(
@@ -159,30 +164,28 @@ def load_data():
         df = pd.DataFrame(SAMPLE_DATA)
         return df, "Sample Data (YC Companies)", True
 
-def call_ollama_llm(prompt, model="llama3.1:8b"):
-    """Call Ollama LLM API"""
-    try:
-        # This would work if Ollama is running locally
-        # For demo purposes, we'll simulate AI responses
-        return simulate_ai_response(prompt)
-    except Exception as e:
-        return f"AI service unavailable: {str(e)}"
+def call_llama3_llm(prompt, df=None):
+    """Compatibility wrapper that forwards to the Hugging Face powered integration."""
+    return simulate_ai_response(prompt, df)
 
-def simulate_ai_response(prompt):
-    """Simulate AI responses for demo purposes"""
-    ai_responses = {
-        "analyze": "Based on the YC company data, I can see several interesting patterns. The AI/ML sector shows strong growth with companies like OpenAI leading innovation. Fintech companies like Stripe demonstrate the continued importance of payment infrastructure. The data suggests a healthy mix of B2B and B2C companies across various industries.",
-        "recommend": "For investment opportunities, I'd recommend focusing on companies in the AI/ML space (like OpenAI) and fintech (like Stripe) as they show strong market potential. Companies with multiple email contacts suggest better accessibility for partnerships.",
-        "trends": "Key trends I observe: 1) AI/ML companies are dominating recent batches, 2) Fintech remains strong with multiple successful exits, 3) Companies with better contact information tend to be more established, 4) B2B SaaS companies show consistent growth patterns.",
-        "insights": "The data reveals that companies with higher email counts (2+ contacts) are typically more mature and partnership-ready. Industries like AI/ML and Fintech show the highest valuations, indicating strong investor confidence in these sectors."
-    }
-    
-    prompt_lower = prompt.lower()
-    for key, response in ai_responses.items():
-        if key in prompt_lower:
-            return response
-    
-    return "I've analyzed the YC company data and found interesting patterns in the startup ecosystem. The companies show diverse industry representation with strong growth in AI/ML and fintech sectors."
+
+def simulate_ai_response(prompt, df=None):
+    """Generate an AI response using the Hugging Face hosted LLaMA 3 80B model."""
+    context = build_dataset_context(df)
+
+    try:
+        return generate_llama3_response(prompt, context=context if context else None)
+    except LLMConfigurationError as exc:
+        st.warning(
+            "LLM configuration issue: {}. Falling back to a canned response.".format(str(exc))
+        )
+    except Exception as exc:  # pragma: no cover - network errors at runtime
+        st.error(f"Failed to retrieve AI response: {exc}")
+
+    return (
+        "I'm unable to connect to the AI service right now, but the dataset still highlights"
+        " strong performance from AI/ML and fintech YC companies with robust contact information."
+    )
 
 def create_metrics(df):
     """Create key metrics display"""
@@ -245,7 +248,10 @@ def main():
     with tab2:
         st.header("🤖 AI-Powered Analysis")
         
-        st.markdown('<div class="ai-box">🧠 <strong>Powered by Llama 3.1 8B</strong> - Advanced AI analysis of YC company data</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="ai-box">🧠 <strong>Powered by Llama 3 80B</strong> - Advanced AI analysis of YC company data</div>',
+            unsafe_allow_html=True,
+        )
         
         # AI Analysis Options
         col1, col2 = st.columns(2)
@@ -271,7 +277,7 @@ def main():
                     else:
                         prompt = st.text_input("Enter your custom query:", key="custom_query")
                     
-                    ai_response = call_ollama_llm(prompt)
+                    ai_response = call_llama3_llm(prompt, df)
                     
                     st.markdown('<div class="ai-response">🤖 <strong>AI Analysis:</strong><br>' + ai_response + '</div>', unsafe_allow_html=True)
         
@@ -304,7 +310,7 @@ def main():
         
         if st.button("Ask AI", key="ask_ai_button") and user_question:
             with st.spinner("AI is thinking..."):
-                ai_answer = call_ollama_llm(user_question)
+                ai_answer = call_llama3_llm(user_question, df)
                 st.markdown('<div class="ai-response">🤖 <strong>AI Response:</strong><br>' + ai_answer + '</div>', unsafe_allow_html=True)
     
     with tab3:

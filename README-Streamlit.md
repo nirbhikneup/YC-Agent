@@ -4,6 +4,7 @@ A beautiful, interactive web application for exploring and analyzing Y Combinato
 
 ## 🚀 Features
 
+- **🤖 Hugging Face AI Insights**: Ask questions powered by Meta LLaMA 3 80B via the Hugging Face Inference API
 - **📊 Interactive Dashboard**: Beautiful visualizations and metrics
 - **🔍 Advanced Filtering**: Filter by batch, email count, company name
 - **📧 Email Analysis**: Dedicated email analysis and extraction
@@ -65,6 +66,7 @@ A beautiful, interactive web application for exploring and analyzing Y Combinato
    - Click "New app"
    - Select your repository: `nirbhikneup/YC-Agent`
    - Set the main file path: `streamlit_app.py`
+   - Configure secrets with your Hugging Face token (see below)
    - Click "Deploy"
 
 4. **Your app will be live at:**
@@ -122,6 +124,16 @@ yc_agent/
 
 ### Data Source
 The app automatically looks for CSV files matching the pattern `yc_companies_*.csv` and loads the most recent one.
+
+### AI Configuration
+
+The Streamlit app and the `streamlit_app.py` entry point reuse the shared `streamlit_production` experience, so AI settings come from environment variables or Streamlit secrets:
+
+- `HUGGINGFACE_API_TOKEN` (required): Token with access to `meta-llama/Meta-Llama-3-80B-Instruct`.
+- `HUGGINGFACE_MODEL_ID` (optional): Use a different compatible chat model hosted on Hugging Face.
+- `LLM_SYSTEM_PROMPT`, `LLM_TEMPERATURE`, `LLM_TOP_P`, `LLM_MAX_TOKENS` (optional): Fine-tune the assistant personality and sampling behaviour.
+
+On Streamlit Cloud, set these values under **Settings → Secrets**. Locally you can export them in your shell before running `streamlit run`.
 
 ### Customization
 You can easily customize:

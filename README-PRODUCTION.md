@@ -31,9 +31,9 @@ This project demonstrates:
 - **Responsive Design** - Mobile and desktop optimized
 
 ### **AI & Analytics**
-- **Llama 3.1 8B** - Large Language Model integration
-- **Ollama** - Local LLM serving (optional)
-- **Simulated AI** - Production-ready AI responses
+- **Meta LLaMA 3 80B (Hugging Face)** - Enterprise-grade LLM integration
+- **Secure Token Management** - Environment-based secrets for deployment
+- **Graceful Fallbacks** - Friendly messaging when the API is unavailable
 - **Real-time Analysis** - Dynamic insights generation
 
 ### **Deployment & DevOps**
@@ -129,7 +129,7 @@ streamlit run streamlit_production.py
                                 ▼                        ▼
                        ┌─────────────────┐    ┌─────────────────┐
                        │   Database      │    │   AI Analysis   │
-                       │  (SQLite)       │    │  (Llama 3.1)    │
+                       │  (SQLite)       │    │  (LLaMA 3 80B)  │
                        └─────────────────┘    └─────────────────┘
 ```
 

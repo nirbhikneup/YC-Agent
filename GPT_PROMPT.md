@@ -15,7 +15,7 @@ I've built a comprehensive YC Company AI Explorer web application that analyzes 
 **Technical Stack:**
 - Backend: Python, Playwright (web scraping), BeautifulSoup (HTML parsing), Pandas (data processing)
 - Frontend: Streamlit (interactive web app), Custom CSS (gradient designs, animations)
-- AI: Simulated Llama 3.1 8B responses for market insights and recommendations
+- AI: Hugging Face hosted Meta LLaMA 3 80B responses for market insights and recommendations
 - Deployment: Streamlit Community Cloud with GitHub integration
 - Data: SQLite database with CSV export capabilities
 
@@ -74,7 +74,7 @@ I'm preparing for technical interviews for software engineering internships. I b
 - Backend: Python web scraper using Playwright for dynamic content
 - Data Pipeline: BeautifulSoup for HTML parsing, Pandas for data processing
 - Frontend: Streamlit with custom CSS for interactive dashboard
-- AI Integration: Simulated LLM responses for market analysis
+- AI Integration: Hugging Face Inference API (Meta LLaMA 3 80B) for market analysis with graceful fallbacks
 - Deployment: Streamlit Community Cloud with GitHub CI/CD
 
 **Technical Challenges Solved**:
@@ -135,7 +135,7 @@ I'm preparing for software engineering intern interviews and want to discuss my 
 - Backend: Python web scraper with Playwright for dynamic content
 - Data Processing: Pandas for analysis, BeautifulSoup for parsing
 - Frontend: Streamlit with custom CSS and responsive design
-- AI: Simulated LLM responses for market analysis
+- AI: Hugging Face powered LLaMA 3 80B responses with cached dataset context
 - Deployment: Streamlit Cloud with GitHub integration
 
 **Key Achievements**:

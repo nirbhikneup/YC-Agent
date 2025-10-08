@@ -5,6 +5,12 @@ import glob
 from datetime import datetime
 import random
 
+from llm_utils import (
+    LLMConfigurationError,
+    build_dataset_context,
+    generate_llama3_response,
+)
+
 # Page configuration
 st.set_page_config(
     page_title="YC Company AI Explorer",
@@ -184,21 +190,23 @@ def load_data():
         df = pd.DataFrame(SAMPLE_DATA)
         return df, "Sample Data (YC Companies)", True
 
-def simulate_ai_response(prompt):
-    """Enhanced AI responses for demo purposes"""
-    ai_responses = {
-        "analyze": "Based on the YC company data analysis, I've identified several key insights: 1) AI/ML companies like OpenAI are leading innovation with the highest valuations, 2) Fintech companies like Stripe show consistent growth and market stability, 3) Companies with multiple email contacts (2+) demonstrate better accessibility and partnership readiness, 4) The data shows a healthy mix of B2B and B2C companies across various industries, 5) Recent batches (2024) show increased focus on AI and data analytics companies.",
-        "recommend": "For investment opportunities, I recommend focusing on: 1) AI/ML companies (OpenAI, Palantir) - highest growth potential, 2) Fintech companies (Stripe, Coinbase) - proven market demand, 3) Companies with 2+ email contacts - better partnership opportunities, 4) B2B SaaS companies - recurring revenue models, 5) Companies in the $10B+ valuation range - established market presence.",
-        "trends": "Key trends identified: 1) AI/ML dominance in recent batches (2024), 2) Fintech remains strong with multiple successful exits, 3) B2B SaaS companies showing consistent growth, 4) Companies with better contact information tend to be more established, 5) Data analytics and cloud computing sectors expanding rapidly, 6) Increased focus on enterprise software solutions.",
-        "insights": "Business insights from the data: 1) Companies with higher email counts (2+) are typically more mature and partnership-ready, 2) AI/ML and Fintech sectors show the highest valuations, indicating strong investor confidence, 3) B2B companies tend to have more structured contact information, 4) Recent batches show increased diversity in industry representation, 5) Companies with multiple contact points demonstrate better customer service and accessibility."
-    }
-    
-    prompt_lower = prompt.lower()
-    for key, response in ai_responses.items():
-        if key in prompt_lower:
-            return response
-    
-    return "I've analyzed the YC company data and found interesting patterns in the startup ecosystem. The companies show diverse industry representation with strong growth in AI/ML, fintech, and data analytics sectors. Companies with multiple contact points demonstrate better market readiness and partnership potential."
+def simulate_ai_response(prompt, df=None):
+    """Call the Hugging Face LLaMA 3 model with dataset context and graceful fallbacks."""
+    context = build_dataset_context(df)
+
+    try:
+        return generate_llama3_response(prompt, context=context if context else None)
+    except LLMConfigurationError as exc:
+        st.warning(
+            "LLM configuration issue: {}. Falling back to a canned response.".format(str(exc))
+        )
+    except Exception as exc:  # pragma: no cover - network errors at runtime
+        st.error(f"Failed to retrieve AI response: {exc}")
+
+    return (
+        "I'm unable to connect to the AI service right now, but the dataset still highlights strong"
+        " performance from AI/ML and fintech companies with multiple contact touchpoints."
+    )
 
 def create_metrics(df):
     """Create key metrics display"""
@@ -325,7 +333,7 @@ def main():
                     else:
                         prompt = st.text_input("Enter your custom query:", key="custom_query")
                     
-                    ai_response = simulate_ai_response(prompt)
+                    ai_response = simulate_ai_response(prompt, df)
                     
                     st.markdown(f'<div class="ai-response">🤖 <strong>AI Analysis:</strong><br><br>{ai_response}</div>', unsafe_allow_html=True)
         
@@ -355,7 +363,7 @@ def main():
         
         if st.button("Ask AI", key="ask_ai_button") and user_question:
             with st.spinner("AI is thinking..."):
-                ai_answer = simulate_ai_response(user_question)
+                ai_answer = simulate_ai_response(user_question, df)
                 st.markdown(f'<div class="ai-response">🤖 <strong>AI Response:</strong><br><br>{ai_answer}</div>', unsafe_allow_html=True)
     
     with tab3:
